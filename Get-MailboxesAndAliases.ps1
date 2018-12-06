@@ -4,21 +4,25 @@ param(
 )
 
 if(test-path($CSVFile)){
+    
     remove-item $CSVFile   
 }
 
+Add-Content -Path $CSVFile -Value "Name,Primary Address,Aliases"
+
 get-mailbox -recipientTypeDetails "UserMailbox","SharedMailbox"| foreach-object{
 
-    $Name = $_.Name
+    $Name = $_.DisplayName
     $AliasList= ""
+    $PrimaryAddress= $_.PrimarySMTPAddress
 
     for($i=0;$i -lt $_.emailaddresses.count;$i++){
         
-        $Address = $_.emailaddresses[$i]
+        [string]$Address = $_.emailaddresses[$i]
+        $AddressSubstring = $Address.substring(5)
 
-        if($Address.isPrimaryAddress -eq $True){
-            $AddressAsString = [string]$Address
-            $AddressToPrint = $AddressAsString.substring(5)
+        if($AddressSubstring -eq $PrimaryAddress){
+            $AddressToPrint = $AddressSubstring          
         }else{
             $AliasAsString = [string]$Address
             $AliasToPrint = $AliasAsString.substring(5)
@@ -27,6 +31,7 @@ get-mailbox -recipientTypeDetails "UserMailbox","SharedMailbox"| foreach-object{
     }
 
     $MailboxLineToCSV = ("$Name,$AddressToPrint,$AliasList").trimend(",")
+    write-host $MailboxLineToCSV
     add-content -path $CSVFile -Value $MailboxLineToCSV
 
 }
@@ -34,16 +39,17 @@ get-mailbox -recipientTypeDetails "UserMailbox","SharedMailbox"| foreach-object{
 
 Get-DistributionGroup | foreach-object{
 
-    $Name=$_.Name
+    $Name = $_.DisplayName
     $AliasList= ""
+    $PrimaryAddress= $_.PrimarySMTPAddress
 
     for($i=0;$i -lt $_.emailaddresses.count;$i++){
-
-        $Address = $_.emailaddresses[$i]
         
-        if($Address.isPrimaryAddress -eq $True){
-            $AddressAsString = [string]$Address
-            $AddressToPrint = $AddressAsString.substring(5)
+        [string]$Address = $_.emailaddresses[$i]
+        $AddressSubstring = $Address.substring(5)
+
+        if($AddressSubstring -eq $PrimaryAddress){
+            $AddressToPrint = $AddressSubstring          
         }else{
             $AliasAsString = [string]$Address
             $AliasToPrint = $AliasAsString.substring(5)
@@ -52,6 +58,7 @@ Get-DistributionGroup | foreach-object{
     }
 
     $MailboxLineToCSV = ("$Name,$AddressToPrint,$AliasList").trimend(",")
+    write-host $MailboxLineToCSV
     add-content -path $CSVFile -Value $MailboxLineToCSV
 
 }
