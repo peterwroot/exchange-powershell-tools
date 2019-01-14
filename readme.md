@@ -6,3 +6,6 @@ Exports a CSV file of all Microsoft Exchange User Mailboxes, Shared Mailboxes, a
 
 The CSV is in the format:
 `Name,PrimarySMTPAddress,Alias,Alias,Alias`
+
+## Connect-ToOffice365.ps1
+Simple script to automate connecting to Exchange Online using PowerShell. 
